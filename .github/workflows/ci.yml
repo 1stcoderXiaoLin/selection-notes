@@ -1,0 +1,28 @@
+name: 验证与打包
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.6'
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run format:check
+      - run: npm run test:unit
+      - run: xvfb-run -a npm run test:integration
+      - run: npm run package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: selection-notes-vsix
+          path: '*.vsix'

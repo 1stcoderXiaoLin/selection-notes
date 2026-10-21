@@ -1,0 +1,179 @@
+{
+  "name": "selection-notes",
+  "displayName": "Selection Notes（选中批注）",
+  "description": "选中文字即可添加批注，将整个项目的原文与批注汇总复制。",
+  "version": "0.1.1",
+  "publisher": "selection-notes-local",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "comments",
+    "annotations",
+    "review",
+    "notes",
+    "批注"
+  ],
+  "icon": "media/icon.png",
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "selectionNotes.copyAll",
+        "title": "Selection Notes: 复制项目全部批注",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "selectionNotes.clearAll",
+        "title": "Selection Notes: 清空项目全部批注",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "selectionNotes.saveComment",
+        "title": "保存"
+      },
+      {
+        "command": "selectionNotes.cancelDraft",
+        "title": "取消"
+      },
+      {
+        "command": "selectionNotes.addComment",
+        "title": "Selection Notes: 添加批注",
+        "enablement": "editorHasSelection && resourceScheme != output && resourceScheme != vscode-output && resourceScheme != log && resourceScheme != vscode-log && resourceScheme != debug && resourceScheme != debug-console && resourceScheme != vscode-debugconsole && resourceScheme != vscode-terminal && resourceScheme != comment && resourceScheme != vscode-comment"
+      },
+      {
+        "command": "selectionNotes.deleteComment",
+        "title": "删除这条批注",
+        "icon": "$(trash)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "selectionNotes.addComment",
+          "when": "editorHasSelection && resourceScheme != output && resourceScheme != vscode-output && resourceScheme != log && resourceScheme != vscode-log && resourceScheme != debug && resourceScheme != debug-console && resourceScheme != vscode-debugconsole && resourceScheme != vscode-terminal && resourceScheme != comment && resourceScheme != vscode-comment",
+          "group": "selectionNotes@0"
+        },
+        {
+          "command": "selectionNotes.copyAll",
+          "group": "selectionNotes@1"
+        },
+        {
+          "command": "selectionNotes.clearAll",
+          "group": "selectionNotes@2"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "selectionNotes.copyAll",
+          "group": "navigation@90"
+        }
+      ],
+      "comments/commentThread/context": [
+        {
+          "command": "selectionNotes.saveComment",
+          "when": "commentController == selectionNotes",
+          "group": "inline@1"
+        },
+        {
+          "command": "selectionNotes.cancelDraft",
+          "when": "commentController == selectionNotes",
+          "group": "inline@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "selectionNotes.saveComment",
+          "when": "false"
+        },
+        {
+          "command": "selectionNotes.cancelDraft",
+          "when": "false"
+        },
+        {
+          "command": "selectionNotes.deleteComment",
+          "when": "false"
+        }
+      ],
+      "comments/comment/title": [
+        {
+          "command": "selectionNotes.deleteComment",
+          "when": "commentController == selectionNotes && comment == selectionNotes.saved",
+          "group": "inline@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Selection Notes（选中批注）",
+      "properties": {
+        "selectionNotes.popupDelay": {
+          "type": "integer",
+          "default": 200,
+          "minimum": 0,
+          "description": "选中文字稳定多久后展开批注框，单位为毫秒。0 表示立即展开。"
+        },
+        "selectionNotes.triggerMode": {
+          "type": "string",
+          "enum": [
+            "contextMenu",
+            "automatic"
+          ],
+          "enumDescriptions": [
+            "选中文字后，右键选择“Selection Notes: 添加批注”。",
+            "鼠标或键盘选区稳定后自动展开批注框。"
+          ],
+          "default": "contextMenu",
+          "description": "添加批注的触发方式。默认使用右键，避免打断文本选择。"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run check && npm run build",
+    "check": "tsc --noEmit",
+    "format:check": "prettier --check .",
+    "format": "prettier --write .",
+    "build": "esbuild src/extension.ts --bundle --external:vscode --platform=node --format=cjs --target=node20 --outfile=dist/extension.js",
+    "watch": "npm run build -- --watch",
+    "test": "npm run test:unit",
+    "test:compile": "tsc -p tsconfig.test.json",
+    "test:unit": "npm run test:compile && node --test out/test/unit/*.test.js",
+    "test:integration": "npm run build && npm run test:compile && node out/test/runIntegration.js",
+    "package": "vsce package --allow-missing-repository --out selection-notes-0.1.1.vsix",
+    "publish": "node scripts/publish.cjs"
+  },
+  "devDependencies": {
+    "@types/mocha": "10.0.10",
+    "@types/node": "20.19.9",
+    "@types/vscode": "1.100.0",
+    "@vscode/test-electron": "2.5.2",
+    "@vscode/vsce": "3.6.2",
+    "esbuild": "0.25.5",
+    "mocha": "11.7.1",
+    "prettier": "3.5.3",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "cheerio": "1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/1stcoderXiaoLin/selection-notes.git"
+  },
+  "homepage": "https://github.com/1stcoderXiaoLin/selection-notes#readme",
+  "bugs": {
+    "url": "https://github.com/1stcoderXiaoLin/selection-notes/issues"
+  }
+}
