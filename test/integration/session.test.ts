@@ -94,21 +94,20 @@ suite(`Selection Notes 扩展宿主：${phase}`, () => {
     });
 
     /**
-     * 向真实输出通道写入 value 并展示，尝试对其文档直接添加批注。
-     * 输出文档不能创建批注；真实辅助面板的鼠标交互仍需人工验收。
+     * 关闭主编辑器，向真实输出通道写入 value 并展示，再执行添加批注命令。
+     * 辅助面板没有可供本插件使用的主编辑器，不应产生批注；鼠标选区仍需人工验收。
      */
-    test('真实输出通道文档不能创建批注', async () => {
+    test('真实输出面板不能通过添加命令创建批注', async () => {
+      await vscode.commands.executeCommand('workbench.action.closeAllEditors');
       const channel = vscode.window.createOutputChannel('Selection Notes 面板过滤测试');
       try {
         channel.appendLine('value');
         channel.show();
         await pause(300);
-        const document = vscode.workspace.textDocuments.find(
-          (item) => item.uri.scheme === 'output' && item.getText().includes('value'),
-        );
-        assert.ok(document, '宿主应报告刚刚展示的输出通道文档');
-        assert.equal(service.openDraft(document, new vscode.Range(0, 0, 0, 5)), undefined);
+        // 输出面板文档不保证向扩展宿主公开，直接验证用户可执行的添加入口。
+        await vscode.commands.executeCommand('selectionNotes.addComment');
         assert.equal(service.threads.length, 0);
+        assert.deepEqual(service.store.all(), []);
       } finally {
         channel.dispose();
       }
